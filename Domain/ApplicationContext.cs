@@ -1,13 +1,18 @@
 ﻿using Domain.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using ServerApplication.Models;
 
-public class ApplicationContext : DbContext
+namespace Domain;
+
+public class ApplicationContext : IdentityDbContext<ApplicationUser>
 {
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    public ApplicationContext(DbContextOptions<ApplicationContext> options)
+        : base(options)
     {
-        optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=red-book;Username=postgres;Password=postgres");
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
     }
-    
+
     public DbSet<User> Users { get; set; }
     public DbSet<UserSettings> Settings { get; set; }
     public DbSet<Category> Categories { get; set; }
@@ -16,6 +21,7 @@ public class ApplicationContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<User>()
             .HasKey(x => x.Id);
         modelBuilder.Entity<User>()
@@ -55,5 +61,5 @@ public class ApplicationContext : DbContext
             });
         modelBuilder.Entity<PlacesChain>()
             .OwnsOne(x => x.Description);
-        }
+    }
 }
