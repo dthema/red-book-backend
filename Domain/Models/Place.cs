@@ -5,17 +5,9 @@ namespace Domain.Models;
 
 public class Place
 {
-    // public Place(Guid id)
-    // {
-        // Id = id;
-        // Description = description;
-        // Location = location;
-    // }
-    //
-    // protected Place() { }
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public Guid Id { get; set; }
-    public Description Description { get; set; }
-    public Geopoint Location { get; set; }
+    public Description Description { get; set; } = new ();
+    public Geopoint Location { get; set; } = new ();
 }

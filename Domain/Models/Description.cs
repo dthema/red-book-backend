@@ -1,19 +1,17 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Domain.Models;
 
 public class Description
 {
-    // public Description(string name, string title, string descriptionText, string audioFilePath)
-    // {
-    //     Name = name;
-    //     Title = title;
-    //     DescriptionText = descriptionText;
-    //     AudioFilePath = audioFilePath;
-    // }
-    //
-    // protected Description() { }
-
+    [MaxLength(32)]
+    [Required]
     public string Name { get; set; }
+    [MaxLength(32)]
+    [Required]
     public string Title { get; set; }
+    [Required]
     public string DescriptionText { get; set; }
+    [Required]
     public string AudioFilePath { get; set; }
 }
