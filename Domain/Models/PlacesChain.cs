@@ -1,0 +1,21 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Domain.Models;
+
+public class PlacesChain
+{
+    // public PlacesChain(Guid id, Description description)
+    // {
+    //     Id = id;
+    //     Description = description;
+    //     Places = new List<Place>();
+    // }
+    //
+    // protected PlacesChain() { }
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public Guid Id { get; set; }
+    public Description Description { get; set; }
+    public virtual ICollection<Place> Places { get; set; }
+}
