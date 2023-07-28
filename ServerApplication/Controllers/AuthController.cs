@@ -85,6 +85,7 @@ public class AuthController : ControllerBase
     {
         try
         {
+            await _serviceManager.UserService.GetAll();
             if (await _userManager.FindByNameAsync(dto.Login) is not null)
                 throw new AuthenticationException("User already exists");
 
@@ -102,9 +103,13 @@ public class AuthController : ControllerBase
             
             await _userManager.AddToRoleAsync(user, Roles.User);
             
-            await _serviceManager.UserService.Add(new User { Login = dto.Login });
+            var newUser = await _serviceManager.UserService.Add(new User { Login = dto.Login });
 
-            return Ok("User registered");
+            return Ok(new
+            {
+                id = newUser.Id.ToString(),
+                login = newUser.Login
+            });
         }
         catch (Exception e)
         {
@@ -137,9 +142,13 @@ public class AuthController : ControllerBase
             await _userManager.AddToRoleAsync(user, Roles.Admin); 
             await _userManager.AddToRoleAsync(user, Roles.User);
 
-            await _serviceManager.UserService.Add(new User { Login = dto.Login });
+            var newUser = await _serviceManager.UserService.Add(new User { Login = dto.Login });
 
-            return Ok("User registered");
+            return Ok(new
+            {
+                id = newUser.Id.ToString(),
+                login = newUser.Login
+            });
         }
         catch (Exception e)
         {
@@ -175,7 +184,7 @@ public class AuthController : ControllerBase
             user.RefreshToken = newRefreshToken;
             await _userManager.UpdateAsync(user);
 
-            return new ObjectResult(new
+            return Ok(new
             {
                 accessToken = new JwtSecurityTokenHandler().WriteToken(newAccessToken),
                 refreshToken = newRefreshToken
@@ -200,7 +209,7 @@ public class AuthController : ControllerBase
 
             await RevokeUserToken(user);
         
-            return NoContent();
+            return Ok();
         }
         catch (Exception e)
         {
@@ -217,24 +226,9 @@ public class AuthController : ControllerBase
         foreach (var user in users)
             await RevokeUserToken(user);
 
-        return NoContent();
+        return Ok();
     }
     
-    [Authorize(Roles = Roles.Admin)]
-    [HttpGet]
-    [Route("test")]
-    public async Task<IActionResult> Get()
-    {
-        try
-        {
-            return Ok("Test");
-        }
-        catch (Exception e)
-        {
-            return BadRequest(e);
-        }
-    }
-
     private async Task InitRoles()
     {
         if (!await _roleManager.RoleExistsAsync(Roles.Admin))
