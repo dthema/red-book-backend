@@ -18,23 +18,48 @@ public class ApplicationContext : IdentityDbContext<ApplicationUser>
     public DbSet<Category> Categories { get; set; }
     public DbSet<Place> Places { get; set; }
     public DbSet<PlacesChain> PlacesChains { get; set; }
+    public DbSet<CategorySettings> CategorySettings { get; set; }
+    public DbSet<PlacesWithChains> PlacesWithChains { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<CategorySettings>()
+            .HasKey(x => new { x.UserSettingsId, x.CategoryId });
+        modelBuilder.Entity<CategorySettings>()
+            .HasOne(x => x.AssociatedSettings)
+            .WithMany(x => x.CategorySettings)
+            .HasForeignKey(x => x.UserSettingsId);
+        modelBuilder.Entity<CategorySettings>()
+            .HasOne(x => x.AssociatedCategory)
+            .WithMany(x => x.CategorySettings)
+            .HasForeignKey(x => x.CategoryId);
+
+        modelBuilder.Entity<PlacesWithChains>()
+            .HasKey(x => new { x.PlaceId, x.PlacesChainId });
+        modelBuilder.Entity<PlacesWithChains>()
+            .HasOne(x => x.AssociatedPlace)
+            .WithMany(x => x.PlacesWithChains)
+            .HasForeignKey(x => x.PlaceId);
+        modelBuilder.Entity<PlacesWithChains>()
+            .HasOne(x => x.AssociatedChain)
+            .WithMany(x => x.PlacesWithChains)
+            .HasForeignKey(x => x.PlacesChainId);
+        
         modelBuilder.Entity<User>()
             .HasKey(x => x.Id);
         modelBuilder.Entity<User>()
             .HasIndex(x => x.Login)
             .IsUnique();
         modelBuilder.Entity<User>()
-            .HasOne(x => x.Settings);
+            .HasOne(x => x.Settings)
+            .WithOne(x => x.User)
+            .HasForeignKey<UserSettings>(x => x.UserId)
+            .IsRequired();
 
         modelBuilder.Entity<UserSettings>()
             .HasKey(x => x.Id);
-        modelBuilder.Entity<UserSettings>()
-            .HasMany(x => x.Categories)
-            .WithMany();
 
         modelBuilder.Entity<Category>()
             .HasKey(x => x.Id);
@@ -45,20 +70,24 @@ public class ApplicationContext : IdentityDbContext<ApplicationUser>
         modelBuilder.Entity<Place>()
             .HasKey(x => x.Id);
         modelBuilder.Entity<Place>()
+            .HasOne(x => x.Category)
+            .WithMany();
+        modelBuilder.Entity<Place>()
             .OwnsOne(x => x.Location);
         modelBuilder.Entity<Place>()
             .OwnsOne(x => x.Description);
         
         modelBuilder.Entity<PlacesChain>()
             .HasKey(x => x.Id);
-        modelBuilder.Entity<PlacesChain>()
-            .HasMany(x => x.Places)
-            .WithMany()
-            .UsingEntity(x =>
-            {
-                x.Property<int>("order").IsRequired();
-                x.ToTable("PlacesAndChains");
-            });
+        // modelBuilder.Entity<PlacesChain>()
+        //     .HasMany(x => x.Places)
+        //     .WithMany()
+        //     .UsingEntity<PlacesWithChains>(x =>
+        //     {
+        //         x.Property(x => x.Order)
+        //             .HasDefaultValue(1)
+        //             .IsRequired();
+        //     });
         modelBuilder.Entity<PlacesChain>()
             .OwnsOne(x => x.Description);
     }

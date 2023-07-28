@@ -11,4 +11,5 @@ public class Category
     [MaxLength(32)]
     [Required]
     public string Name { get; set; }
+    public virtual ICollection<CategorySettings> CategorySettings { get; set; } = new List<CategorySettings>();
 }

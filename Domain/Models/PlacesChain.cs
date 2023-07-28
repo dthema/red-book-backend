@@ -9,5 +9,5 @@ public class PlacesChain
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public Guid Id { get; set; }
     public Description Description { get; set; } = new ();
-    public virtual ICollection<Place> Places { get; set; } = new List<Place>();
+    public virtual ICollection<PlacesWithChains> PlacesWithChains { get; set; } = new HashSet<PlacesWithChains>();
 }

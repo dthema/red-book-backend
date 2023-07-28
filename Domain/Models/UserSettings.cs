@@ -8,7 +8,9 @@ public class UserSettings
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public Guid Id { get; set; }
-
+    [Required]
+    public Guid UserId { get; set; }
+    public User User { get; set; }
     public bool CheckAround { get; set; }
-    public virtual ICollection<Category> Categories { get; set; } = new List<Category>();
+    public virtual ICollection<CategorySettings> CategorySettings { get; set; } = new List<CategorySettings>();
 }
