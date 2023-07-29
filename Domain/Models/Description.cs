@@ -13,5 +13,7 @@ public class Description
     [Required]
     public string DescriptionText { get; set; }
     [Required]
+    public string ImagePath { get; set; }
+    [Required]
     public string AudioFilePath { get; set; }
 }

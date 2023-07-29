@@ -12,5 +12,6 @@ public class Place
     public Category Category { get; set; }
     public Description Description { get; set; } = new ();
     public Geopoint Location { get; set; } = new ();
-    public virtual ICollection<PlacesWithChains> PlacesWithChains { get; set; } = new HashSet<PlacesWithChains>();
+    public virtual ICollection<PlacesWithChains> PlacesWithChains { get; set; } = new List<PlacesWithChains>();
+    public virtual ICollection<FavoritePlacesSettings> FavoritePlacesSettings { get; set; } = new List<FavoritePlacesSettings>();
 }

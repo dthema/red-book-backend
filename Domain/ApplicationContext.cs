@@ -18,6 +18,7 @@ public class ApplicationContext : IdentityDbContext<ApplicationUser>
     public DbSet<Category> Categories { get; set; }
     public DbSet<Place> Places { get; set; }
     public DbSet<PlacesChain> PlacesChains { get; set; }
+    public DbSet<FavoritePlacesSettings> FavoritePlacesSettings { get; set; }
     public DbSet<CategorySettings> CategorySettings { get; set; }
     public DbSet<PlacesWithChains> PlacesWithChains { get; set; }
 
@@ -46,6 +47,17 @@ public class ApplicationContext : IdentityDbContext<ApplicationUser>
             .HasOne(x => x.AssociatedChain)
             .WithMany(x => x.PlacesWithChains)
             .HasForeignKey(x => x.PlacesChainId);
+
+        modelBuilder.Entity<FavoritePlacesSettings>()
+            .HasKey(x => new { x.UserSettingsId, x.PlaceId });
+        modelBuilder.Entity<FavoritePlacesSettings>()
+            .HasOne(x => x.AssociatedSettings)
+            .WithMany(x => x.FavoritePlacesSettings)
+            .HasForeignKey(x => x.UserSettingsId);
+        modelBuilder.Entity<FavoritePlacesSettings>()
+            .HasOne(x => x.AssociatedPlace)
+            .WithMany(x => x.FavoritePlacesSettings)
+            .HasForeignKey(x => x.PlaceId);
         
         modelBuilder.Entity<User>()
             .HasKey(x => x.Id);
@@ -79,15 +91,6 @@ public class ApplicationContext : IdentityDbContext<ApplicationUser>
         
         modelBuilder.Entity<PlacesChain>()
             .HasKey(x => x.Id);
-        // modelBuilder.Entity<PlacesChain>()
-        //     .HasMany(x => x.Places)
-        //     .WithMany()
-        //     .UsingEntity<PlacesWithChains>(x =>
-        //     {
-        //         x.Property(x => x.Order)
-        //             .HasDefaultValue(1)
-        //             .IsRequired();
-        //     });
         modelBuilder.Entity<PlacesChain>()
             .OwnsOne(x => x.Description);
     }
