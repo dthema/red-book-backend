@@ -23,37 +23,59 @@ public class SettingsService : ISettingsService
 
     public async Task SetInterestingCategories(Guid userId, ICollection<Guid> categoriesIds)
     {
-        var settings = await GeTSettings(userId);
-        var categories = settings.CategorySettings.Select(x => x.AssociatedCategory);
-        var usedCategories = new List<Category>();
-        var unusedCategories = new List<Category>();
+        var settings = await GeTSettingsWithCategories(userId);
+        var categories = await _appCtx.Categories.Where(x => categoriesIds.Contains(x.Id)).ToListAsync();
+        var settingsCategories = settings.CategorySettings.Select(x => x.AssociatedCategory).ToList();
 
-        foreach (var category in _appCtx.Categories.ToList())
+        var transaction = await _appCtx.Database.BeginTransactionAsync();
+        
+        foreach (var category in settingsCategories)
         {
-            if (categoriesIds.Contains(category.Id) && !categories.Contains(category))
-                usedCategories.Add(category);
-            if (!categoriesIds.Contains(category.Id) && categories.Contains(category))
-                unusedCategories.Add(category);
+            if (!categoriesIds.Contains(category.Id))
+            {
+                var link = await _appCtx.CategorySettings.FindAsync(settings.Id, category.Id)
+                           ?? throw new ArgumentException();
+                _appCtx.CategorySettings.Remove(link);
+            }
+            else
+            {
+                categories.Remove(category);
+            }
         }
 
-        foreach (var link in unusedCategories
-                     .Select(unusedCategory => _appCtx.Find<CategorySettings>(settings.Id, unusedCategory.Id))
-                      ?? throw new ArgumentException())
+        foreach (var category in categories)
         {
-            _appCtx.Remove(link);
-        }
-
-        foreach (var usedCategory in usedCategories)
-        {
-            _appCtx.Add(new CategorySettings
+            await _appCtx.CategorySettings.AddAsync(new CategorySettings
             {
                 UserSettingsId = settings.Id,
-                CategoryId = usedCategory.Id
+                CategoryId = category.Id
             });
         }
 
         _appCtx.Update(settings);
         await _appCtx.SaveChangesAsync();
+        
+        await transaction.CommitAsync();
+    }
+
+    public async Task AddFavoritePlace(Guid userId, Guid placeId)
+    {   
+        var settings = await GeTSettings(userId);
+        await _appCtx.AddAsync(new FavoritePlacesSettings
+        {
+            UserSettingsId = settings.Id,
+            PlaceId = placeId
+        });
+    }
+
+    public async Task RemoveFavoritePlace(Guid userId, Guid placeId)
+    {
+        var settings = await GeTSettings(userId);
+        _appCtx.Remove(new FavoritePlacesSettings
+        {
+            UserSettingsId = settings.Id,
+            PlaceId = placeId
+        });
     }
 
     public async Task<bool> GetCheckAround(Guid userId)
@@ -61,12 +83,38 @@ public class SettingsService : ISettingsService
         return (await GeTSettings(userId)).CheckAround;
     }
 
+
     public async Task<ICollection<Category>> GetInterestingCategories(Guid userId)
     {
-        return (await GeTSettings(userId)).CategorySettings.Select(x => x.AssociatedCategory).ToList();
+        
+        return (await GeTSettingsWithCategories(userId)).CategorySettings
+            .Select(x => x.AssociatedCategory).ToList();
+    }
+
+    public async Task<ICollection<Place>> GetFavoritePlaces(Guid userId)
+    {
+        var settings = await _appCtx.Settings
+            .Include(x => x.FavoritePlacesSettings)
+            .ThenInclude(x => x.AssociatedPlace)
+            .FirstOrDefaultAsync(x => x.UserId.Equals(userId)) ?? throw new ArgumentException();
+        return settings.FavoritePlacesSettings.Select(x => x.AssociatedPlace).ToList();
+    }
+
+    public async Task<UserSettings> GetUserSettings(Guid userId)
+    {
+        return await _appCtx.Settings
+            .Include(x => x.CategorySettings)
+            .Include(x => x.FavoritePlacesSettings)
+            .FirstOrDefaultAsync(x => x.UserId.Equals(userId)) ?? throw new ArgumentException();
     }
 
     private async Task<UserSettings> GeTSettings(Guid userId)
+    {
+        return await _appCtx.Settings
+            .FirstOrDefaultAsync(x => x.UserId.Equals(userId)) ?? throw new ArgumentException();
+    }
+
+    private async Task<UserSettings> GeTSettingsWithCategories(Guid userId)
     {
         return await _appCtx.Settings
             .Include(x => x.CategorySettings)

@@ -10,5 +10,5 @@ public interface ICrudService<T>
     Task<bool> DeleteById(Guid id);
     Task<T> Get(Guid id);
     Task<T?> Find(Guid id);
-    Task<ICollection<T>> GetAll();
+    Task<List<T>> GetAll();
 }

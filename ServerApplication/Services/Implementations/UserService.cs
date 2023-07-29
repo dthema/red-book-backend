@@ -15,9 +15,9 @@ public class UserService : IUserService
 
     public async Task<User> Add(User entity)
     {
-        var user = _appCtx.Users.Add(entity).Entity;
+        var user = await _appCtx.Users.AddAsync(entity);
         await _appCtx.SaveChangesAsync();
-        return user;
+        return user.Entity;
     }
 
     public async Task<User> Update(User entity)
@@ -48,13 +48,13 @@ public class UserService : IUserService
         return await Find(id) ?? throw new InvalidOperationException();
     }
 
-    public async Task<User?> Find(Guid id)
+    public Task<User?> Find(Guid id)
     {
-        return await _appCtx.Users.FirstOrDefaultAsync(user => user.Id.Equals(id));
+        return _appCtx.Users.FirstOrDefaultAsync(user => user.Id.Equals(id));
     }
 
-    public async Task<ICollection<User>> GetAll()
+    public Task<List<User>> GetAll()
     {
-        return await _appCtx.Users.ToListAsync();
+        return _appCtx.Users.ToListAsync();
     }
 }
