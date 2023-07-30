@@ -8,6 +8,7 @@ public class Place
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public Guid Id { get; set; }
+    public Guid CategoryId { get; set; }
     [Required]
     public Category Category { get; set; }
     public Description Description { get; set; } = new ();

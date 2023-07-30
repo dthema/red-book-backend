@@ -83,7 +83,8 @@ public class ApplicationContext : IdentityDbContext<ApplicationUser>
             .HasKey(x => x.Id);
         modelBuilder.Entity<Place>()
             .HasOne(x => x.Category)
-            .WithMany();
+            .WithMany()
+            .HasForeignKey(x => x.CategoryId);
         modelBuilder.Entity<Place>()
             .OwnsOne(x => x.Location);
         modelBuilder.Entity<Place>()
