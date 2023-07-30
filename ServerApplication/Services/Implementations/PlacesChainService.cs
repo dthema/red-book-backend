@@ -5,13 +5,8 @@ namespace ServerApplication.Services.Implementations;
 
 public class PlacesChainService : CrudService<PlacesChain>, IPlacesChainService
 {
-    private readonly ApplicationContext _appCtx;
-
     public PlacesChainService(ApplicationContext appCtx)
-        : base(appCtx)
-    {
-        _appCtx = appCtx;
-    }
+        : base(appCtx) { }
 
     public async Task AddPlaceToChain(Guid chainId, Guid placeId, int order)
     {
