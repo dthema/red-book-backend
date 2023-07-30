@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Models;
 
-public class User
+public class User : IEntity
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
