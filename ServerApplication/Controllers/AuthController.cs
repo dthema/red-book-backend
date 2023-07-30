@@ -18,6 +18,7 @@ namespace ServerApplication.Controllers;
 [Route("api/auth")]
 public class AuthController : ControllerBase
 {
+    private readonly TokenValidationParameters _tokenValidationParameters;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IConfiguration _configuration;
@@ -33,8 +34,21 @@ public class AuthController : ControllerBase
         _roleManager = roleManager;
         _configuration = configuration;
         _serviceManager = serviceManager;
+        _tokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = false,
+            ValidateIssuerSigningKey = true,
+            ClockSkew = TimeSpan.Zero,
+
+            ValidAudience = _configuration["JWT:ValidAudience"],
+            ValidIssuer = _configuration["JWT:ValidIssuer"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]))
+        };
     }
     
+    [AllowAnonymous]
     [HttpPost]
     [Route("login")]
     public async Task<IActionResult> Login([FromBody] UnregisteredUserDto dto)
@@ -79,6 +93,7 @@ public class AuthController : ControllerBase
         }
     }
 
+    [AllowAnonymous]
     [HttpPost]
     [Route("register")]
     public async Task<IActionResult> Register([FromBody] UnregisteredUserDto dto)
@@ -117,6 +132,7 @@ public class AuthController : ControllerBase
         }
     }
 
+    [Authorize(Roles = Roles.Admin)]
     [HttpPost]
     [Route("register-admin")]
     public async Task<IActionResult> RegisterAdmin([FromBody] UnregisteredUserDto dto)
@@ -156,6 +172,7 @@ public class AuthController : ControllerBase
         }
     }
 
+    [AllowAnonymous]
     [HttpPost]
     [Route("refresh-token")]
     public async Task<IActionResult> RefreshToken(TokenDto dto)
@@ -168,7 +185,19 @@ public class AuthController : ControllerBase
             var accessToken = dto.AccessToken;
             var refreshToken = dto.RefreshToken;
 
-            var principal = GetPrincipalFromExpiredToken(accessToken);
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var principal = tokenHandler.ValidateToken(accessToken, _tokenValidationParameters, out var validatedToken);
+
+            // Now we need to check if the token has a valid security algorithm
+            if(validatedToken is JwtSecurityToken jwtSecurityToken)
+            {
+                var result = jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase);
+
+                if(result == false) {
+                    return null;
+                }
+            }
+
             if (principal is null)
                 throw new ArgumentException("Invalid access token or refresh token");
 
@@ -181,7 +210,11 @@ public class AuthController : ControllerBase
             var newAccessToken = GenerateAccessToken(principal.Claims.ToList());
             var newRefreshToken = GenerateRefreshToken();
 
+            _ = int.TryParse(_configuration["JWT:RefreshTokenValidityInDays"], out int refreshTokenValidityInDays);
+
             user.RefreshToken = newRefreshToken;
+            user.RefreshTokenExpiryTime = DateTime.Now.AddDays(refreshTokenValidityInDays);
+            
             await _userManager.UpdateAsync(user);
 
             return Ok(new
@@ -261,26 +294,10 @@ public class AuthController : ControllerBase
         return Convert.ToBase64String(randomNumber);
     }
 
-    private ClaimsPrincipal? GetPrincipalFromExpiredToken(string? token)
-    {
-        var tokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateAudience = false,
-            ValidateIssuer = false,
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"])),
-            ValidateLifetime = false
-        };
-
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
-        if (securityToken is not JwtSecurityToken jwtSecurityToken ||
-            !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256,
-                StringComparison.InvariantCultureIgnoreCase))
-            throw new SecurityTokenException("Invalid token");
-
-        return principal;
-    }
+    // private ClaimsPrincipal? GetPrincipalFromExpiredToken(string? token)
+    // {
+    //     return principal;
+    // }
 
     private async Task RevokeUserToken(ApplicationUser user)
     {

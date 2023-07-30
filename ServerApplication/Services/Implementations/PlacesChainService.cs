@@ -66,6 +66,7 @@ public class PlacesChainService : IPlacesChainService
             PlacesChainId = chainId,
             Order = order
         });
+        await _appCtx.SaveChangesAsync();
     }
 
     public async Task RemovePlaceToChain(Guid chainId, Guid placeId)
@@ -73,5 +74,6 @@ public class PlacesChainService : IPlacesChainService
         var link = await _appCtx.PlacesWithChains.FindAsync(placeId, chainId)
                    ?? throw new ArgumentException();
         _appCtx.PlacesWithChains.Remove(link);
+        await _appCtx.SaveChangesAsync();
     }
 }

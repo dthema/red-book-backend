@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using Domain;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -44,6 +45,11 @@ builder.Services
         };
     });
 
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = options.DefaultPolicy;
+});
+
 builder.Services.AddScoped<IServiceManager, ServiceManager>();
 builder.Services.AddControllers()
     .AddNewtonsoftJson(options =>
@@ -64,9 +70,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.MapControllers();
+
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.MapControllers();
 
 app.Run();

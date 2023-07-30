@@ -66,6 +66,7 @@ public class SettingsService : ISettingsService
             UserSettingsId = settings.Id,
             PlaceId = placeId
         });
+        await _appCtx.SaveChangesAsync();
     }
 
     public async Task RemoveFavoritePlace(Guid userId, Guid placeId)
@@ -76,13 +77,13 @@ public class SettingsService : ISettingsService
             UserSettingsId = settings.Id,
             PlaceId = placeId
         });
+        await _appCtx.SaveChangesAsync();
     }
 
     public async Task<bool> GetCheckAround(Guid userId)
     {
         return (await GeTSettings(userId)).CheckAround;
     }
-
 
     public async Task<ICollection<Category>> GetInterestingCategories(Guid userId)
     {
@@ -104,7 +105,10 @@ public class SettingsService : ISettingsService
     {
         return await _appCtx.Settings
             .Include(x => x.CategorySettings)
+            .ThenInclude(x => x.AssociatedCategory)
             .Include(x => x.FavoritePlacesSettings)
+            .ThenInclude(x => x.AssociatedPlace)
+            .ThenInclude(x => x.Category)
             .FirstOrDefaultAsync(x => x.UserId.Equals(userId)) ?? throw new ArgumentException();
     }
 
