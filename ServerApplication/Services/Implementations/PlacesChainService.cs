@@ -27,20 +27,20 @@ public class PlacesChainService : IPlacesChainService
         return placesChain;
     }
 
-    public async Task<bool> Delete(PlacesChain entity)
+    public async Task<PlacesChain> Delete(PlacesChain entity)
     {
-        _appCtx.PlacesChains.Remove(entity);
+        var placesChain = _appCtx.PlacesChains.Remove(entity).Entity;
         await _appCtx.SaveChangesAsync();
-        return true;
+        return placesChain;
     }
 
-    public async Task<bool> DeleteById(Guid id)
+    public async Task<PlacesChain> DeleteById(Guid id)
     {
         var placesChain = new PlacesChain { Id = id };
         _appCtx.PlacesChains.Attach(placesChain);
-        _appCtx.PlacesChains.Remove(placesChain);
+        var removedPlacesChain = _appCtx.PlacesChains.Remove(placesChain).Entity;
         await _appCtx.SaveChangesAsync();
-        return true;
+        return removedPlacesChain;
     }
 
     public async Task<PlacesChain> Get(Guid id)
