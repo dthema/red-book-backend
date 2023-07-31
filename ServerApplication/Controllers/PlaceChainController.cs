@@ -3,13 +3,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ServerApplication.DTO;
 using ServerApplication.Mappers;
+using ServerApplication.Models;
 using ServerApplication.Services;
 
 namespace ServerApplication.Controllers;
 
 [ApiController]
-// [Authorize(Roles = Roles.Admin)]
-[AllowAnonymous]
+[Authorize(Roles = Roles.Admin)]
 [Route("api/place-chain")]
 public class PlaceChainController : ControllerBase
 {
@@ -101,7 +101,7 @@ public class PlaceChainController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize]
+    [Authorize(Roles = Roles.User)]
     [Route("{id}")]
     public async Task<IActionResult> Get(Guid id)
     {
@@ -118,7 +118,7 @@ public class PlaceChainController : ControllerBase
     }
     
     [HttpGet]
-    [Authorize]
+    [Authorize(Roles = Roles.User)]
     [Route("all")]
     public async Task<IActionResult> GetAll()
     {

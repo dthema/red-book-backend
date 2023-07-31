@@ -8,8 +8,7 @@ using ServerApplication.Services;
 namespace ServerApplication.Controllers;
 
 [ApiController]
-// [Authorize(Roles = Roles.Admin)]
-[AllowAnonymous]
+[Authorize(Roles = Roles.Admin)]
 [Route("api/place")]
 public class PlaceController : ControllerBase
 {
@@ -69,7 +68,7 @@ public class PlaceController : ControllerBase
     }
     
     [HttpGet]
-    [Authorize]
+    [Authorize(Roles = Roles.User)]
     [Route("{id}")]
     public async Task<IActionResult> Get(Guid id)
     {
@@ -86,7 +85,7 @@ public class PlaceController : ControllerBase
     }
     
     [HttpGet]
-    [Authorize]
+    [Authorize(Roles = Roles.User)]
     [Route("all")]
     public async Task<IActionResult> GetAll()
     {
@@ -103,7 +102,7 @@ public class PlaceController : ControllerBase
     }
     
     [HttpGet]
-    [Authorize]
+    [Authorize(Roles = Roles.User)]
     [Route("all/{categoryId}")]
     public async Task<IActionResult> GetAllByCategory(Guid categoryId)
     {

@@ -68,7 +68,7 @@ public class CategoryController : ControllerBase
     }
     
     [HttpGet]
-    [Authorize]
+    [Authorize(Roles = Roles.User)]
     [Route("{id}")]
     public async Task<IActionResult> Get(Guid id)
     {
@@ -85,7 +85,7 @@ public class CategoryController : ControllerBase
     }
     
     [HttpGet]
-    [Authorize]
+    [Authorize(Roles = Roles.User)]
     [Route("all")]
     public async Task<IActionResult> GetAll()
     {
