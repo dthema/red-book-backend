@@ -1,5 +1,6 @@
 using Domain;
 using Domain.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace ServerApplication.Services.Implementations;
 
@@ -25,5 +26,19 @@ public class PlacesChainService : CrudService<PlacesChain>, IPlacesChainService
                    ?? throw new ArgumentException();
         _appCtx.PlacesWithChains.Remove(link);
         await _appCtx.SaveChangesAsync();
+    }
+
+    public new Task<PlacesChain?> Find(Guid id)
+    {
+        return _appCtx.PlacesChains
+            .Include(x => x.PlacesWithChains)
+            .FirstOrDefaultAsync(x => x.Id.Equals(id));
+    }
+
+    public new Task<List<PlacesChain>> GetAll()
+    {
+        return _appCtx.PlacesChains
+            .Include(x => x.PlacesWithChains)
+            .ToListAsync();
     }
 }

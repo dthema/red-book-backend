@@ -6,4 +6,5 @@ public interface IServiceManager
     ISettingsService SettingsService { get; }
     ICategoryService CategoryService { get; }
     IPlaceService PlaceService { get; }
+    IPlacesChainService PlacesChainService { get; }
 }

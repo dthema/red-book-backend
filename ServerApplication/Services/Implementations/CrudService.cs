@@ -44,7 +44,7 @@ public abstract class CrudService<T> where T : class, IEntity
 
     public async Task<T> Get(Guid id)
     {
-        return await _appCtx.FindAsync<T>(id) ?? throw new ArgumentException();
+        return await Find(id) ?? throw new ArgumentException();
     }
 
     public Task<T?> Find(Guid id)

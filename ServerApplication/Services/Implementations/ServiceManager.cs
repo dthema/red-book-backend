@@ -8,6 +8,7 @@ public class ServiceManager : IServiceManager
     private readonly Lazy<ISettingsService> _lazySettingsService;
     private readonly Lazy<ICategoryService> _lazyCategoryService;
     private readonly Lazy<IPlaceService> _lazyPlaceService;
+    private readonly Lazy<IPlacesChainService> _lazyPlaceChainService;
 
     public ServiceManager(ApplicationContext appCtx)
     {
@@ -17,10 +18,12 @@ public class ServiceManager : IServiceManager
         _lazySettingsService = new Lazy<ISettingsService>(() => new SettingsService(appCtx));
         _lazyCategoryService = new Lazy<ICategoryService>(() => new CategoryService(appCtx));
         _lazyPlaceService = new Lazy<IPlaceService>(() => new PlaceService(appCtx));
+        _lazyPlaceChainService = new Lazy<IPlacesChainService>(() => new PlacesChainService(appCtx));
     }
 
     public IUserService UserService => _lazyUserService.Value;
     public ISettingsService SettingsService => _lazySettingsService.Value;
     public ICategoryService CategoryService => _lazyCategoryService.Value;
     public IPlaceService PlaceService => _lazyPlaceService.Value;
+    public IPlacesChainService PlacesChainService => _lazyPlaceChainService.Value;
 }
