@@ -60,14 +60,15 @@ public class AuthController : ControllerBase
             if (!await _userManager.CheckPasswordAsync(user, dto.Password))
                 throw new AuthenticationException("Used wrong password. Check it and try again");
 
-            var userRoles = await _userManager.GetRolesAsync(user);
-
+            var myUser = await _serviceManager.UserService.GetByLogin(dto.Login);
             var claims = new List<Claim>
             {
                 new(ClaimTypes.Name, user.UserName ?? throw new ArgumentNullException($"Cannot get {nameof(user.UserName)}")),
+                new(ClaimTypes.NameIdentifier, myUser.Id.ToString()),
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
 
+            var userRoles = await _userManager.GetRolesAsync(user);
             claims.AddRange(userRoles.Select(userRole => new Claim(ClaimTypes.Role, userRole)));
 
             var accessToken = GenerateAccessToken(claims);

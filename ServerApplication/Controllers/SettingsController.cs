@@ -1,9 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ServerApplication.DTO;
 using ServerApplication.Mappers;
-using ServerApplication.Models;
 using ServerApplication.Services;
 
 namespace ServerApplication.Controllers;
@@ -11,16 +9,12 @@ namespace ServerApplication.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/settings")]
-public class SettingsController : ControllerBase
+public class SettingsController : AIdentifyingController
 {
-    private readonly UserManager<ApplicationUser> _userManager;
     private readonly IServiceManager _serviceManager;
 
-    public SettingsController(
-        UserManager<ApplicationUser> userManager,
-        IServiceManager serviceManager)
+    public SettingsController(IServiceManager serviceManager)
     {
-        _userManager = userManager;
         _serviceManager = serviceManager;
     }
 
@@ -30,6 +24,8 @@ public class SettingsController : ControllerBase
     {
         try
         {
+            IdentifyUserId(dto.UserId);
+
             await _serviceManager.SettingsService.SetCheckAround(dto.UserId, dto.CheckAround);
 
             return Ok(dto);
@@ -42,13 +38,15 @@ public class SettingsController : ControllerBase
 
     [HttpPost]
     [Route("categories")]
-    public async Task<IActionResult> SetInterestingCategories([FromBody] UserCategoriesIdsDto idsDto)
+    public async Task<IActionResult> SetInterestingCategories([FromBody] UserCategoriesIdsDto dto)
     {
         try
         {
-            await _serviceManager.SettingsService.SetInterestingCategories(idsDto.UserId, idsDto.CategoriesIds);
+            IdentifyUserId(dto.UserId);
 
-            return Ok(idsDto);
+            await _serviceManager.SettingsService.SetInterestingCategories(dto.UserId, dto.CategoriesIds);
+
+            return Ok(dto);
         }
         catch (Exception e)
         {
@@ -58,13 +56,15 @@ public class SettingsController : ControllerBase
 
     [HttpPost]
     [Route("add-favorite-place")]
-    public async Task<IActionResult> AddFavoritePlace([FromBody] UserFavoritePlaceIdDto idDto)
+    public async Task<IActionResult> AddFavoritePlace([FromBody] UserFavoritePlaceIdDto dto)
     {
         try
         {
-            await _serviceManager.SettingsService.AddFavoritePlace(idDto.UserId, idDto.PlaceId);
+            IdentifyUserId(dto.UserId);
 
-            return Ok(idDto);
+            await _serviceManager.SettingsService.AddFavoritePlace(dto.UserId, dto.PlaceId);
+
+            return Ok(dto);
         }
         catch (Exception e)
         {
@@ -74,13 +74,15 @@ public class SettingsController : ControllerBase
 
     [HttpPost]
     [Route("remove-favorite-place")]
-    public async Task<IActionResult> RemoveFavoritePlace([FromBody] UserFavoritePlaceIdDto idDto)
+    public async Task<IActionResult> RemoveFavoritePlace([FromBody] UserFavoritePlaceIdDto dto)
     {
         try
         {
-            await _serviceManager.SettingsService.RemoveFavoritePlace(idDto.UserId, idDto.PlaceId);
+            IdentifyUserId(dto.UserId);
 
-            return Ok(idDto);
+            await _serviceManager.SettingsService.RemoveFavoritePlace(dto.UserId, dto.PlaceId);
+
+            return Ok(dto);
         }
         catch (Exception e)
         {
@@ -94,6 +96,8 @@ public class SettingsController : ControllerBase
     {
         try
         {
+            IdentifyUserId(userId);
+
             var checkAround = await _serviceManager.SettingsService.GetCheckAround(userId);
 
             return Ok(new UserCheckAroundDto(userId, checkAround));
@@ -110,6 +114,8 @@ public class SettingsController : ControllerBase
     {
         try
         {
+            IdentifyUserId(userId);
+
             var categories = await _serviceManager.SettingsService.GetInterestingCategories(userId);
 
             return Ok(new UserCategoriesDto(userId, categories.Select(x => x.AsDto())));
@@ -126,6 +132,8 @@ public class SettingsController : ControllerBase
     {
         try
         {
+            IdentifyUserId(userId);
+            
             var places = await _serviceManager.SettingsService.GetFavoritePlaces(userId);
 
             return Ok(new UserFavoritePlacesDto(userId, places.Select(x => x.AsDto())));
@@ -142,6 +150,8 @@ public class SettingsController : ControllerBase
     {
         try
         {
+            IdentifyUserId(userId);
+            
             var settings = await _serviceManager.SettingsService.GetUserSettings(userId);
 
             return Ok(settings.AsDto());
