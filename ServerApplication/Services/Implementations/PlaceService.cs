@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ServerApplication.Services.Implementations;
 
-public class PlaceService : CrudService<Place>, IPlaceService
+public class PlaceService : ACrudService<Place>, IPlaceService
 {
     public PlaceService(ApplicationContext appCtx)
         : base(appCtx) { }

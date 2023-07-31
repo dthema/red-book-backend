@@ -4,13 +4,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ServerApplication.Services.Implementations;
 
-public class PlacesChainService : CrudService<PlacesChain>, IPlacesChainService
+public class PlacesChainService : ACrudService<PlacesChain>, IPlacesChainService
 {
     public PlacesChainService(ApplicationContext appCtx)
         : base(appCtx) { }
 
     public async Task AddPlaceToChain(Guid chainId, Guid placeId, int order)
     {
+        if (_appCtx.PlacesWithChains.Any(x => x.PlaceId.Equals(placeId) || x.Order.Equals(order)))
+            throw new ArgumentException();
         await _appCtx.PlacesWithChains.AddAsync(new PlacesWithChains
         {
             PlaceId = placeId,

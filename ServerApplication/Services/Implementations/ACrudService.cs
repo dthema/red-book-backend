@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ServerApplication.Services.Implementations;
 
-public abstract class CrudService<T> where T : class, IEntity
+public abstract class ACrudService<T> where T : class, IEntity
 {
     protected readonly ApplicationContext _appCtx;
     
-    public CrudService(ApplicationContext appCtx)
+    public ACrudService(ApplicationContext appCtx)
     {
         _appCtx = appCtx;
     }
