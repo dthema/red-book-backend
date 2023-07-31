@@ -7,4 +7,5 @@ public interface IServiceManager
     ICategoryService CategoryService { get; }
     IPlaceService PlaceService { get; }
     IPlacesChainService PlacesChainService { get; }
+    IGeoService GeoService { get; }
 }
