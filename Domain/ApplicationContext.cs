@@ -93,6 +93,10 @@ public class ApplicationContext : IdentityDbContext<ApplicationUser>
         modelBuilder.Entity<PlacesChain>()
             .HasKey(x => x.Id);
         modelBuilder.Entity<PlacesChain>()
+            .HasOne(x => x.Category)
+            .WithMany()
+            .HasForeignKey(x => x.CategoryId);
+        modelBuilder.Entity<PlacesChain>()
             .OwnsOne(x => x.Description);
     }
 }

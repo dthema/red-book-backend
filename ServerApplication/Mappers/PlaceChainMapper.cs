@@ -6,13 +6,14 @@ namespace ServerApplication.Mappers;
 public static class PlaceChainMapper
 {
     public static PlacesChainDto AsDto(this PlacesChain placesChain)
-        => new PlacesChainDto(placesChain.Id, placesChain.Description, placesChain.PlacesWithChains.Select(x => x.AsDto()));
+        => new PlacesChainDto(placesChain.Id, placesChain.Description, placesChain.CategoryId, placesChain.PlacesWithChains.Select(x => x.AsDto()));
     
     public static PlacesChain AsEntity(this PlacesChainDto dto)
         => new PlacesChain
         {
             Id = dto.Id,
             Description = dto.Description,
+            CategoryId = dto.CategoryId,
             PlacesWithChains = dto.PlacesWithChain.Select(x => x.AsEntity()).ToList()
         };
 
@@ -20,6 +21,7 @@ public static class PlaceChainMapper
         => new PlacesChain
         {
             Description = dto.Description,
+            CategoryId = dto.CategoryId
         };
     
     public static PlacesChain AsEntity(this UpdatedPlacesChainDto dto)
@@ -27,6 +29,7 @@ public static class PlaceChainMapper
         {
             Id = dto.Id,
             Description = dto.Description,
+            CategoryId = dto.CategoryId
         };
     
     public static PlacesWithChainDto AsDto(this PlacesWithChains placesWithChains)

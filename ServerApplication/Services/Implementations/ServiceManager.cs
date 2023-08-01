@@ -13,6 +13,8 @@ public class ServiceManager : IServiceManager
 
     public ServiceManager(ApplicationContext appCtx)
     {
+        appCtx.Database.EnsureDeleted();
+        appCtx.Database.EnsureCreated();
         _lazyUserService = new Lazy<IUserService>(() => new UserService(appCtx));
         _lazySettingsService = new Lazy<ISettingsService>(() => new SettingsService(appCtx));
         _lazyCategoryService = new Lazy<ICategoryService>(() => new CategoryService(appCtx));
