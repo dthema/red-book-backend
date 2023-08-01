@@ -11,5 +11,7 @@ public class Category : IEntity
     [MaxLength(32)]
     [Required]
     public string Name { get; set; }
+    [Required]
+    public string IconFilePath { get; set; }
     public virtual ICollection<CategorySettings> CategorySettings { get; set; } = new List<CategorySettings>();
 }

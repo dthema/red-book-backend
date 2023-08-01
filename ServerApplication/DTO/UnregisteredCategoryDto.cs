@@ -1,3 +1,3 @@
 namespace ServerApplication.DTO;
 
-public record UnregisteredCategoryDto(string Name);
+public record UnregisteredCategoryDto(string Name, string IconFilePath);
